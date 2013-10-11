@@ -1,6 +1,6 @@
 {
     "commands": [
-        "/work/nfaggian/GFE/GFESuite-Builds/Release/release/bin/pylint",
+        "/work/nfaggian/GFE/GFESuite-Builds/Release/release/bin/pylint --msg-template=\"{path}:{line}: [{msg_id}] {msg}\" -r no",
         "/work/nfaggian/GFE/GFESuite-Builds/Release/release/bin/pep8",
     ],
     // parse into (filename, line, message)

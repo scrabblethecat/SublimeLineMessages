@@ -105,10 +105,15 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
     def run(self, edit):
         """Updates global state and region markers"""
 
-        messages = execute(
-            CMD,
-            self.view.file_name(),
-            parser_from_regex(RGX))
+        commands = get_settings_param(self.view, 'commands', [])
+        regexes = get_settings_param(self.view, 'regexes', [])
+
+        messages = []
+        for command, regex in zip(commands, regexes):
+            messages += execute(
+                command,
+                self.view.file_name(),
+                parser_from_regex(regex))
 
         # Remove the existing markup.
         region_keys = LINE_REGION_KEYS.get(self.view.id(), [])
