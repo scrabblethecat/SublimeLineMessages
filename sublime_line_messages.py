@@ -95,9 +95,7 @@ class LineMessagesCommand(sublime_plugin.TextCommand):
         sublime.set_timeout_async(self.run_command, 0)
 
     def run_command(self):
-        """Lints the current view."""
-        # Invoke the update to the GUI
-        print('he2re')
+        """Execute the command."""
         self.view.run_command('line_messages_update')
 
 
@@ -109,7 +107,7 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
 
         messages = execute(
             CMD,
-            '/home/accounts/nfaggian/Desktop/test2.py',
+            self.view.file_name(),
             parser_from_regex(RGX))
 
         # Remove the existing markup.
