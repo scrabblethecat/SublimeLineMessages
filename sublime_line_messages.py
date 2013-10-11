@@ -10,9 +10,6 @@ SETTINGS_FILE = 'SublimeLineMessages.sublime-settings'
 LINE_MESSAGES = {}
 LINE_REGION_KEYS = {}
 
-CMD = '/usr/bin/pylint --msg-template="{path}:{line}: [{msg_id}] {msg}" -r no'
-RGX = '(.*):([1-9]+):\s(.*)'
-
 Message = collections.namedtuple('Message', 'filename line message')
 
 
@@ -114,6 +111,9 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
                 command,
                 self.view.file_name(),
                 parser_from_regex(regex))
+
+        messages = sorted(messages, key=lambda x: x.line)
+
 
         # Remove the existing markup.
         region_keys = LINE_REGION_KEYS.get(self.view.id(), [])
