@@ -1,0 +1,17 @@
+{
+    "commands": [
+        "/work/nfaggian/GFE/GFESuite-Builds/Release/release/bin/pylint",
+        "/work/nfaggian/GFE/GFESuite-Builds/Release/release/bin/pep8",
+    ],
+    // parse into (filename, line, message)
+    "regexes": [
+        "(.*):([1-9]+):(.*)",
+        "(.*):.*:([1-9]+):(.*)"
+    ],
+    // define markers
+    "markers": [
+        "plain",
+        "plain"
+    ],
+    "verbose": true
+}
