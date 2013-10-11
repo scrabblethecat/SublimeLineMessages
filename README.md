@@ -15,14 +15,14 @@ Update your configuration to point at your pylint executable, like so:
     "tools": [
         {
             "name": "pylint",
-            "command": "/Users/nfaggian/anaconda/bin/pylint",
+            "command": "/usr/bin/pylint",
             "options": "--msg-template=\"{path}:{line}: [{msg_id}] {msg}\" -r no",
             "parser": "(.*):([1-9]+):(.*)",
             "marker": "plain"
         },
         {
             "name": "pep8",
-            "command": "/Users/nfaggian/anaconda/bin/pep8",
+            "command": "/usr/bin/pep8",
             "options": "",
             "parser": "(.*):.*:([1-9]+):(.*)",
             "marker": "plain"
