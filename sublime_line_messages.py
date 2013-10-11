@@ -5,6 +5,7 @@ import subprocess
 import re
 import collections
 
+
 SETTINGS_FILE = 'SublimeLineMessages.sublime-settings'
 
 LINE_MESSAGES = {}
@@ -74,7 +75,7 @@ class LineMessagesListener(sublime_plugin.EventListener):
     """Executes the linter on specific GUI stimuli."""
 
     def __init__(self):
-        super(SublimeLineMessagesListener).__init__()
+        super(LineMessagesListener).__init__()
 
     def on_selection_modified_async(self, view):
         status_toggler(line_number(view), view.id())
@@ -102,15 +103,15 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
     def run(self, edit):
         """Updates global state and region markers"""
 
-        commands = get_settings_param(self.view, 'commands', [])
-        regexes = get_settings_param(self.view, 'regexes', [])
+        tools = get_settings_param(self.view, 'tools', [])
+        verbose = get_settings_param(self.view, 'verbose', True)
 
         messages = []
-        for command, regex in zip(commands, regexes):
+        for tool in tools:
             messages += execute(
-                command,
+                "{} {}".format(tool['command'], tool['options']),
                 self.view.file_name(),
-                parser_from_regex(regex))
+                parser_from_regex(tool['parser']))
 
         messages = sorted(messages, key=lambda x: x.line)
 

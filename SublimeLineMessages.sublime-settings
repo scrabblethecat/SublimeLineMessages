@@ -1,17 +1,19 @@
 {
-    "commands": [
-        "/work/nfaggian/GFE/GFESuite-Builds/Release/release/bin/pylint --msg-template=\"{path}:{line}: [{msg_id}] {msg}\" -r no",
-        "/work/nfaggian/GFE/GFESuite-Builds/Release/release/bin/pep8",
-    ],
-    // parse into (filename, line, message)
-    "regexes": [
-        "(.*):([1-9]+):(.*)",
-        "(.*):.*:([1-9]+):(.*)"
-    ],
-    // define markers
-    "markers": [
-        "plain",
-        "plain"
+    "tools": [
+        {
+            "name": "pylint",
+            "command": "/Users/nfaggian/anaconda/bin/pylint",
+            "options": "--msg-template=\"{path}:{line}: [{msg_id}] {msg}\" -r no",
+            "parser": "(.*):([1-9]+):(.*)",
+            "marker": "plain"
+        },
+        {
+            "name": "pep8",
+            "command": "/Users/nfaggian/anaconda/bin/pep8",
+            "options": "",
+            "parser": "(.*):.*:([1-9]+):(.*)",
+            "marker": "plain"
+        }
     ],
     "verbose": true
 }
