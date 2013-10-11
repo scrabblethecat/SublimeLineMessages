@@ -107,13 +107,10 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
     def run(self, edit):
         """Updates global state and region markers"""
 
-        print('here222')
         messages = execute(
             CMD,
             '/home/accounts/nfaggian/Desktop/test2.py',
             parser_from_regex(RGX))
-
-        print(messages)
 
         # Remove the existing markup.
         region_keys = LINE_REGION_KEYS.get(self.view.id(), [])
@@ -129,9 +126,10 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
             LINE_REGION_KEYS[self.view.id()] = []
 
             for line in line_messsage_data.keys():
+
                 region = self.view.line(self.view.text_point(line, 0))
                 key = '{}_{}_message'.format(line, self.view.id())
-                LINT_REGION_KEYS[self.view.id()].append(key)
+                LINE_REGION_KEYS[self.view.id()].append(key)
 
                 self.view.add_regions(key,
                     [region],
@@ -140,7 +138,6 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
                     sublime.DRAW_NO_FILL)
 
         # Show a status window with linter output.
-        if verbose:
-            self.output_view = self.view.window().create_output_panel('messages')
-            self.output_view.insert(edit, 0, str(messages))
-            self.view.window().run_command("show_panel", {"panel": "output.messages"})
+        self.output_view = self.view.window().create_output_panel('messages')
+        self.output_view.insert(edit, 0, ''.join(['{}: {}\n'.format(x.line, x.message) for x in messages] ))
+        self.view.window().run_command("show_panel", {"panel": "output.messages"})
