@@ -1,8 +1,9 @@
-SublimePylint
-=============
+SublimeLineMessages
+===================
 
-A (very) simple sublime-text (3) plugin that runs "pylint", the python linter.
-
+A generic sublime text plugin for tools that generate line enumerated content
+that could be visible in the status bar or as regions - for example linters or
+profilers
 
 Configuration
 -------------
@@ -10,13 +11,28 @@ Configuration
 Update your configuration to point at your pylint executable, like so:
 
 ```
-  {
-      "pylint_command": "/work/anaconda/bin/pylint"
-  }
+{
+    "tools": [
+        {
+            "name": "pylint",
+            "command": "/Users/nfaggian/anaconda/bin/pylint",
+            "options": "--msg-template=\"{path}:{line}: [{msg_id}] {msg}\" -r no",
+            "parser": "(.*):([1-9]+):(.*)",
+            "marker": "plain"
+        },
+        {
+            "name": "pep8",
+            "command": "/Users/nfaggian/anaconda/bin/pep8",
+            "options": "",
+            "parser": "(.*):.*:([1-9]+):(.*)",
+            "marker": "plain"
+        }
+    ],
+    "verbose": true
+}
 ```
 
 Usage
 -----
 
-When editing python files, use the key-binding (ctrl-alt-l) to invoke the linter, 
-which will mark all errors.
+When editing python files, use the key-binding (ctrl-alt-l) to invoke the tools.
