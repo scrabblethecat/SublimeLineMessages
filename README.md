@@ -8,7 +8,7 @@ profilers
 Configuration
 -------------
 
-Update your configuration to point at your pylint executable, like so:
+Update your configuration to point at your tool executables, like so:
 
 ```
 {
@@ -31,6 +31,12 @@ Update your configuration to point at your pylint executable, like so:
     "verbose": true
 }
 ```
+
+Note the user of a parser, which is used to form three important components:
+
+    1. The filename.
+    2. The line number containing the message.
+    3. The message (lint output).
 
 Usage
 -----
