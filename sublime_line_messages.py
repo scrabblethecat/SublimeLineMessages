@@ -6,40 +6,39 @@ import re
 import collections
 
 
-# class MessageContainer(object):
-#     """
-#     A container class that is responsible for the addition, subtraction and
-#     viewing (in the GUI) of messages.
-#     """
+class MessageContainer(object):
+    """
+    A container class that is responsible for the addition, subtraction and
+    viewing (in the GUI) of messages.
+    """
 
-#     def __init__(self, view):
-#         self.view = view
-#         self._data = {}
+    def __init__(self, view):
+        self.view = view
+        self.line_messages = collections.defaultdict(list)
+        self.region_keys = []
 
-#     def add_message(self, message):
-#         # Form a region.
-#         region = self.view.line(self.view.text_point(message.line, 0))
-#         key = '{}_{}_message'.format(message.line, self.view.id())
-#         self.view.add_regions(key, [region], 'error', '', sublime.DRAW_NO_FILL)
+    def add_message(self, message):
+        self.line_messages[message.line].append(message.message)
 
-#         # Cache the message.
-#         self._data[message] = _region(message)
+    def add_regions(self):
+        for line, message in self.line_messages.iteritems():
+            region = self.view.line(self.view.text_point(message.line, 0))
+            key = '{}_{}_message'.format(line, self.view.id())
+            self.view.add_regions(key, [region], 'error', '', sublime.DRAW_NO_FILL)
+            self.region_keys.append(key)
 
-#     def delete_message(self, message):
-#         region = self._data
-#         del self._data[message]
+    def clear_regions(self):
+        for region_key in self.region_keys:
+            self.view.erase_regions(region_key)
+        self.region_keys = []
 
-#     def clear_messages(self)
-#         self._messages = []
-#         for region in self.
-#         self.view.erase_regions(key)
+    def line_message(self, line):
+        return ' '.join(self.line_messages[line])
 
 
 SETTINGS_FILE = 'SublimeLineMessages.sublime-settings'
 
 LINE_MESSAGES = {}
-LINE_REGION_KEYS = {}
-
 
 Message = collections.namedtuple('Message', 'filename line message')
 
@@ -136,6 +135,10 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
         tools = get_settings_param(self.view, 'tools', [])
         verbose = get_settings_param(self.view, 'verbose', True)
 
+        container = LINE_MESSAGES.setdefault(
+            self.view.id(),
+            MessageContainer(self.view))
+
         messages = []
         for tool in tools:
             messages += execute(
@@ -145,30 +148,13 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
 
         messages = sorted(messages, key=lambda x: x.line)
 
-        # Remove the existing markup.
-        region_keys = LINE_REGION_KEYS.get(self.view.id(), [])
-        if region_keys:
-            for key in region_keys:
-                self.view.erase_regions(key)
+        # clear existing regions.
+        container.clear_regions()
 
-        line_messsage_data = {x.line:x.message for x in messages}
+        for message in messages:
+            container.add_message(message)
 
-        # Mark the regions containing lint.
-        if messages:
-            LINE_MESSAGES[self.view.id()] = line_messsage_data
-            LINE_REGION_KEYS[self.view.id()] = []
-
-            for line in line_messsage_data.keys():
-
-                region = self.view.line(self.view.text_point(line, 0))
-                key = '{}_{}_message'.format(line, self.view.id())
-                LINE_REGION_KEYS[self.view.id()].append(key)
-
-                self.view.add_regions(key,
-                    [region],
-                    'error',
-                    '',
-                    sublime.DRAW_NO_FILL)
+        container.add_regions()
 
         # Show a status window with linter output.
         self.output_view = self.view.window().create_output_panel('messages')
