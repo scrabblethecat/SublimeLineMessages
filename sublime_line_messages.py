@@ -6,10 +6,40 @@ import re
 import collections
 
 
+# class MessageContainer(object):
+#     """
+#     A container class that is responsible for the addition, subtraction and
+#     viewing (in the GUI) of messages.
+#     """
+
+#     def __init__(self, view):
+#         self.view = view
+#         self._data = {}
+
+#     def add_message(self, message):
+#         # Form a region.
+#         region = self.view.line(self.view.text_point(message.line, 0))
+#         key = '{}_{}_message'.format(message.line, self.view.id())
+#         self.view.add_regions(key, [region], 'error', '', sublime.DRAW_NO_FILL)
+
+#         # Cache the message.
+#         self._data[message] = _region(message)
+
+#     def delete_message(self, message):
+#         region = self._data
+#         del self._data[message]
+
+#     def clear_messages(self)
+#         self._messages = []
+#         for region in self.
+#         self.view.erase_regions(key)
+
+
 SETTINGS_FILE = 'SublimeLineMessages.sublime-settings'
 
 LINE_MESSAGES = {}
 LINE_REGION_KEYS = {}
+
 
 Message = collections.namedtuple('Message', 'filename line message')
 
@@ -114,7 +144,6 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
                 parser_from_regex(tool['parser']))
 
         messages = sorted(messages, key=lambda x: x.line)
-
 
         # Remove the existing markup.
         region_keys = LINE_REGION_KEYS.get(self.view.id(), [])
