@@ -1,9 +1,14 @@
 import sublime
 import sublime_plugin
-
 import subprocess
 import re
 import collections
+
+
+SETTINGS_FILE = 'SublimeLineMessages.sublime-settings'
+LINE_MESSAGES = {}
+
+Message = collections.namedtuple('Message', 'filename line message')
 
 
 class MessageContainer(object):
@@ -15,32 +20,26 @@ class MessageContainer(object):
     def __init__(self, view):
         self.view = view
         self.line_messages = collections.defaultdict(list)
-        self.region_keys = []
+        self.region_key = '{}_line_message'.format(self.view.id())
 
     def add_message(self, message):
         self.line_messages[message.line].append(message.message)
 
     def add_regions(self):
-        for line, message in self.line_messages.iteritems():
-            region = self.view.line(self.view.text_point(message.line, 0))
-            key = '{}_{}_message'.format(line, self.view.id())
-            self.view.add_regions(key, [region], 'error', '', sublime.DRAW_NO_FILL)
-            self.region_keys.append(key)
+
+        regions = [
+            self.view.line(self.view.text_point(line-1, 0)) for line in
+                self.line_messages ]
+
+        self.view.add_regions(self.region_key, regions, 'error', '', sublime.DRAW_NO_FILL)
 
     def clear_regions(self):
-        for region_key in self.region_keys:
-            self.view.erase_regions(region_key)
-        self.region_keys = []
+        self.view.erase_regions(self.region_key)
 
     def line_message(self, line):
-        return ' '.join(self.line_messages[line])
-
-
-SETTINGS_FILE = 'SublimeLineMessages.sublime-settings'
-
-LINE_MESSAGES = {}
-
-Message = collections.namedtuple('Message', 'filename line message')
+        if line in self.line_messages:
+            return ' '.join(self.line_messages[line])
+        return ''
 
 
 def parser_from_regex(regex):
@@ -54,6 +53,8 @@ def parser_from_regex(regex):
             result = _regex.match(line)
             if result is not None:
                 filename, line, message = result.groups()
+                print(filename, line, message)
+                if not line: line=1
                 messages.append(Message(filename, int(line), message))
         return messages
     return parser
@@ -65,7 +66,7 @@ def execute(command, filename, parser):
     a list of message objects.
     """
     try:
-        cmd = '{} {}'.format(command, re.escape(filename))
+        cmd = '{} \"{}\"'.format(command, filename)
         output = subprocess.check_output(
                     cmd,
                     stderr=subprocess.STDOUT,
@@ -77,10 +78,10 @@ def execute(command, filename, parser):
 
 def status_toggler(line, vid):
     """Updates statue bar messages."""
-    messages = LINE_MESSAGES.get(vid)
-    if messages is None:
+    container = LINE_MESSAGES.get(vid)
+    if container is None:
         return
-    sublime.status_message(messages.get(line, ''))
+    sublime.status_message(container.line_message(line))
 
 
 def line_number(view):

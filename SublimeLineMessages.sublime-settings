@@ -3,15 +3,15 @@
         {
             "name": "pylint",
             "command": "/Users/nfaggian/anaconda/bin/pylint",
-            "options": "--msg-template=\"{path}:{line}: [{msg_id}] {msg}\" -r no",
-            "parser": "(.*):([1-9]+):(.*)",
+            "options": "-r no",
+            "parser": "(.*):\\s*([1-9]*).*:\\s(.*)",
             "marker": "plain"
         },
         {
             "name": "pep8",
             "command": "/Users/nfaggian/anaconda/bin/pep8",
             "options": "",
-            "parser": "(.*):.*:([1-9]+):(.*)",
+            "parser": "(.*):([1-9]*):[1-9]*:(.*)",
             "marker": "plain"
         }
     ],
