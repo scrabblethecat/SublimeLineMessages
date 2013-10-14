@@ -18,16 +18,15 @@ Update your configuration to point at your tool executables, like so:
             "command": "/usr/bin/pylint",
             "options": "--msg-template=\"{path}:{line}: [{msg_id}] {msg}\" -r no",
             "parser": "(.*):([1-9]+):(.*)",
-            "marker": "plain"
         },
         {
             "name": "pep8",
             "command": "/usr/bin/pep8",
             "options": "",
             "parser": "(.*):.*:([1-9]+):(.*)",
-            "marker": "plain"
         }
     ],
+    "highlight": false,
     "verbose": true
 }
 ```
