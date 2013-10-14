@@ -17,13 +17,13 @@ Update your configuration to point at your tool executables, like so:
             "name": "pylint",
             "command": "/usr/bin/pylint",
             "options": "--msg-template=\"{path}:{line}: [{msg_id}] {msg}\" -r no",
-            "parser": "(.*):([1-9]+):(.*)",
+            "parser": "(.*):(.*):(.*)",
         },
         {
             "name": "pep8",
             "command": "/usr/bin/pep8",
             "options": "",
-            "parser": "(.*):.*:([1-9]+):(.*)",
+            "parser": "(.*):.*:(.*):(.*)",
         }
     ],
     "highlight": false,
@@ -31,7 +31,8 @@ Update your configuration to point at your tool executables, like so:
 }
 ```
 
-Note the user of a parser, which is used to form three important components:
+Note the user of a parser regular expression, which is used to extract three important 
+components of data from the output of the tool (`command`).
 
     1. The filename.
     2. The line number containing the message.
