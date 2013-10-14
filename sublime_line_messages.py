@@ -4,11 +4,19 @@ import subprocess
 import re
 import collections
 
-
 SETTINGS_FILE = 'SublimeLineMessages.sublime-settings'
+
 LINE_MESSAGES = {}
 
-Message = collections.namedtuple('Message', 'filename line message')
+class Message(object):
+    def __init__(self, filename, tool, line, message):
+        self.filename = filename
+        self.tool = tool
+        self.line = line
+        self.message = message
+
+    def __str__(self):
+        return '[{:^10}]{:>4}:{}'.format(self.tool, self.line, self.message)
 
 
 class MessageContainer(object):
@@ -22,15 +30,16 @@ class MessageContainer(object):
         self.line_messages = collections.defaultdict(list)
         self.region_key = '{}_line_message'.format(self.view.id())
 
-    def add_message(self, message):
-        self.line_messages[message.line].append(message.message)
+    def add_message(self, message, noline=False):
+        if not noline:
+            self.line_messages[message.line].append(message)
+        else:
+            self.line_messages[0] = message
 
     def add_regions(self):
-
         regions = [
             self.view.line(self.view.text_point(line-1, 0)) for line in
                 self.line_messages ]
-
         self.view.add_regions(self.region_key, regions, 'error', '', sublime.DRAW_NO_FILL)
 
     def clear_regions(self):
@@ -41,8 +50,14 @@ class MessageContainer(object):
             return ' '.join(self.line_messages[line])
         return ''
 
+    def __str__(self):
+        text = ''
+        for line in self.line_messages:
+            for message in self.line_messages[line]:
+                text += str(message) + '\n'
+        return text
 
-def parser_from_regex(regex):
+def parser_from_regex(tool, regex):
     """
     Forms a line parser from a regex, returns a parsing function.
     """
@@ -53,9 +68,11 @@ def parser_from_regex(regex):
             result = _regex.match(line)
             if result is not None:
                 filename, line, message = result.groups()
-                print(filename, line, message)
-                if not line: line=1
-                messages.append(Message(filename, int(line), message))
+                messages.append(
+                    Message(filename,
+                            tool,
+                            int(line) if line else 1,
+                            message))
         return messages
     return parser
 
@@ -135,6 +152,7 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
 
         tools = get_settings_param(self.view, 'tools', [])
         verbose = get_settings_param(self.view, 'verbose', True)
+        highlight = get_settings_param(self.view, 'highlight', False)
 
         container = LINE_MESSAGES.setdefault(
             self.view.id(),
@@ -145,19 +163,22 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
             messages += execute(
                 "{} {}".format(tool['command'], tool['options']),
                 self.view.file_name(),
-                parser_from_regex(tool['parser']))
+                parser_from_regex(tool['name'], tool['parser']))
 
         messages = sorted(messages, key=lambda x: x.line)
 
-        # clear existing regions.
+        # Clear all existing regions.
         container.clear_regions()
 
+        # Add messages.
         for message in messages:
-            container.add_message(message)
+            container.add_message(message, noline=message.line is None)
 
-        container.add_regions()
+        # Add highlights to lines.
+        if highlight:
+            container.add_regions()
 
-        # Show a status window with linter output.
-        self.output_view = self.view.window().create_output_panel('messages')
-        self.output_view.insert(edit, 0, ''.join(['{}: {}\n'.format(x.line, x.message) for x in messages] ))
-        self.view.window().run_command("show_panel", {"panel": "output.messages"})
+        if verbose:
+            self.output_view = self.view.window().create_output_panel('messages')
+            self.output_view.insert(edit, 0, str(container))
+            self.view.window().run_command("show_panel", {"panel": "output.messages"})

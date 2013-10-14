@@ -2,18 +2,17 @@
     "tools": [
         {
             "name": "pylint",
-            "command": "/Users/nfaggian/anaconda/bin/pylint",
-            "options": "-r no",
-            "parser": "(.*):\\s*([1-9]*).*:\\s(.*)",
-            "marker": "plain"
+            "command": "/work/nfaggian/GFE/GFESuite-Builds/Release/release/bin/pylint",
+            "options": "-r no -f parseable --rcfile=/work/nfaggian/GFE/GFESuite/.pylintrc ",
+            "parser": "(.*):(.*):(.*)",
         },
         {
             "name": "pep8",
-            "command": "/Users/nfaggian/anaconda/bin/pep8",
-            "options": "",
-            "parser": "(.*):([1-9]*):[1-9]*:(.*)",
-            "marker": "plain"
+            "command": "/work/nfaggian/GFE/GFESuite-Builds/Release/release/bin/pep8",
+            "options": "--format=pylint",
+            "parser": "(.*):(.*):(.*)",
         }
     ],
+    "mark_regions": true,
     "verbose": true
 }
