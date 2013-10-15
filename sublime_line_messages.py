@@ -44,6 +44,7 @@ class MessageContainer(object):
 
     def clear_regions(self):
         self.view.erase_regions(self.region_key)
+        self.line_messages = collections.defaultdict(list)
 
     def line_message(self, line):
         if line in self.line_messages:
