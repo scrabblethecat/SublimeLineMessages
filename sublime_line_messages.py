@@ -53,7 +53,7 @@ class MessageContainer(object):
 
     def __str__(self):
         text = ''
-        for line in self.line_messages:
+        for line in sorted(self.line_messages):
             for message in self.line_messages[line]:
                 text += str(message) + '\n'
         return text
