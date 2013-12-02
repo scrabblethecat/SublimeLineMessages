@@ -13,6 +13,8 @@
             "parser": "(.*):(.*):(.*)",
         }
     ],
-    "mark_regions": true,
-    "verbose": true
+ 
+    "highlight": false,
+    "verbose_popup": false,
+    "verbose_buffer": true,
 }
