@@ -152,7 +152,8 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
         """Updates global state and region markers"""
 
         tools = get_settings_param(self.view, 'tools', [])
-        verbose = get_settings_param(self.view, 'verbose', True)
+        verbose_popup = get_settings_param(self.view, 'verbose_popup', False)
+        verbose_buffer = get_settings_param(self.view, 'verbose_buffer', False)
         highlight = get_settings_param(self.view, 'highlight', False)
 
         container = LINE_MESSAGES.setdefault(
@@ -179,7 +180,26 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
         if highlight:
             container.add_regions()
 
-        if verbose:
+        active_view = self.view.window().active_view()
+
+        views = {name: index for (index, name) in enumerate([x.name() for x in self.view.window().views()])}
+
+        if verbose_buffer:
+            self.output_view = None
+            view_index = views.get('line-messages')
+            if view_index is not None:
+                self.output_view = self.view.window().views()[view_index]
+
+            if self.output_view is None:
+                self.output_view = self.view.window().new_file()
+                self.output_view.set_name('line-messages')
+
+            for region in reversed(self.output_view.find_all('.*')):
+                self.output_view.erase(edit, region)
+
+            self.output_view.insert(edit, 0, str(container))
+
+        if verbose_popup:
             self.output_view = self.view.window().create_output_panel('messages')
             self.output_view.insert(edit, 0, str(container))
             self.view.window().run_command("show_panel", {"panel": "output.messages"})
