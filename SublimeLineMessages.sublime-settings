@@ -4,13 +4,13 @@
             "name": "pylint",
             "command": "/Users/nfaggian/anaconda/bin/pylint",
             "options": "-r no --msg-template=\"{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}\"",
-            "parser": "(.*):(.*):(.*)",
+            "parser": "(.*):([1-9]*):(.*)",
         },
         {
             "name": "pep8",
             "command": "/Users/nfaggian/anaconda/bin/pep8",
             "options": "--format=pylint",
-            "parser": "(.*):(.*):(.*)",
+            "parser": "(.*):([1-9]*):(.*)",
         }
     ],
 
