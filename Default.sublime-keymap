@@ -1,5 +1,8 @@
 [
     {
         "keys": ["ctrl+alt+l"], "command": "sublime_line_messages"
+
     },
+        {"keys": ["f4"], "command": "next_error", "args":{"next":true}},
+        {"keys": ["shift+f4"], "command": "next_error", "args":{"next":false}},
 ]
