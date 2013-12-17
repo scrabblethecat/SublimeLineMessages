@@ -16,7 +16,8 @@ class Message(object):
         self.message = message
 
     def __str__(self):
-        return '[{:^10}]{:>4}:{}'.format(self.tool, self.line, self.message)
+        # return '[{:^10}]{:>4}:{}'.format(self.tool, self.line, self.message)
+        return '{:>4}:\t{}'.format(self.line, self.message)
 
 
 class MessageContainer(object):
@@ -40,7 +41,8 @@ class MessageContainer(object):
         regions = [
             self.view.line(self.view.text_point(line-1, 0)) for line in
                 self.line_messages ]
-        self.view.add_regions(self.region_key, regions, 'error', '', sublime.DRAW_NO_FILL)
+        self.view.add_regions(self.region_key, regions, 'error', 'dot', sublime.DRAW_NO_OUTLINE | sublime.DRAW_NO_FILL)
+        # self.view.add_regions(self.region_key, regions, icon='cross')
 
     def clear_regions(self):
         self.view.erase_regions(self.region_key)
@@ -68,11 +70,11 @@ def parser_from_regex(tool, regex):
         for line in text.split('\n'):
             result = _regex.match(line)
             if result is not None:
-                filename, line, message = result.groups()
+                filename, lineNo, message = result.groups()
                 messages.append(
                     Message(filename,
                             tool,
-                            int(line) if line else 1,
+                            int(lineNo) if lineNo else 1,
                             message))
         return messages
     return parser
@@ -104,7 +106,12 @@ def status_toggler(line, vid):
 
 def line_number(view):
     """Returns the line number from the view."""
-    return view.rowcol(view.sel()[0].end())[0]
+    sel = view.sel()
+    if sel and len(sel) > 0:
+        firstSel = sel[0]
+        return view.rowcol(firstSel.end())[0]
+    else:
+        return 0
 
 
 def get_settings_param(view, param_name, default=None):
@@ -186,20 +193,46 @@ class LineMessagesUpdate(sublime_plugin.TextCommand):
 
         if verbose_buffer:
             self.output_view = None
-            view_index = views.get('line-messages')
+            view_index = views.get('Python-Errors')
             if view_index is not None:
                 self.output_view = self.view.window().views()[view_index]
 
             if self.output_view is None:
                 self.output_view = self.view.window().new_file()
-                self.output_view.set_name('line-messages')
+                self.output_view.set_name('Python-Errors')
+                # self.output_view.set_read_only(True)
+                self.output_view.set_scratch(True)
 
             for region in reversed(self.output_view.find_all('.*')):
                 self.output_view.erase(edit, region)
 
-            self.output_view.insert(edit, 0, str(container))
+            self.output_view.insert(edit, 0, self.view.file_name() + '\n' + str(container))
+            lines = [self.output_view.text_point(line, 0) for line in range(len(messages))]
+            regions = [sublime.Region(lineStart, lineStart + 5) for lineStart in lines]
+            self.output_view.add_regions('Python-Errors_lines', regions, 'string', '', sublime.DRAW_NO_OUTLINE | sublime.DRAW_NO_FILL)
 
         if verbose_popup:
             self.output_view = self.view.window().create_output_panel('messages')
             self.output_view.insert(edit, 0, str(container))
             self.view.window().run_command("show_panel", {"panel": "output.messages"})
+
+
+class LineClick(sublime_plugin.WindowCommand):
+    def run(self):
+        view = self.window.active_view()
+        if view.name() == 'Python-Errors':
+            line = view.line(view.sel()[0])
+
+            lineNo = int(view.substr(line)[:4]) - 1
+            windowName = view.substr(view.line(0))
+            views = {view.file_name(): view for view in self.window.views()}
+            matchingView = views.get(windowName)
+            print('selected:{}@{}'.format(lineNo, windowName))
+            matchingView.sel().clear()
+            matchingView.sel().add(matchingView.text_point(lineNo, 0))
+            matchingView.show(matchingView.text_point(lineNo, 0))
+            matchingView.set_status('pyerror', view.substr(line)[5:])
+            view.sel().clear()
+            view.add_regions('current_error', [line], 'error', 'dot', sublime.DRAW_NO_OUTLINE | sublime.DRAW_NO_FILL)
+
+            self.window.focus_view(matchingView)
